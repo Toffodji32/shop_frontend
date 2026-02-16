@@ -1,0 +1,37 @@
+import axios from 'axios';
+import { useAuthStore } from '../stores/auth';
+import router from '../router';
+
+const api = axios.create({
+  baseURL: 'https://127.0.0.1:8000/api',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Intercepteur pour ajouter le token JWT
+api.interceptors.request.use((config) => {
+  const authStore = useAuthStore();
+  if (authStore.token) {
+    config.headers.Authorization = `Bearer ${authStore.token}`;
+  }
+  return config;
+});
+
+// Intercepteur pour gérer les erreurs (401 JWT expiré)
+api.interceptors.response.use(
+  response => response,
+  (error) => {
+    const authStore = useAuthStore();
+
+    if (error.response?.status === 401) {
+      console.warn('JWT expiré ou non valide, déconnexion...');
+      authStore.logout(); // supprime le token
+      router.push('/login'); // redirige vers login
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+export default api;

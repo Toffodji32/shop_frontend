@@ -1,0 +1,19 @@
+import { createApp } from 'vue'
+import { createPinia } from 'pinia'
+import App from './App.vue'
+import router from './router'
+
+// Bootstrap
+import 'bootstrap/dist/css/bootstrap.min.css'
+import 'bootstrap/dist/js/bootstrap.bundle.min.js'
+
+// Tes fichiers perso (optionnels)
+import './assets/style.css'
+import './assets/script.js'
+
+const app = createApp(App)
+
+app.use(createPinia()) // 👉 ajout Pinia
+app.use(router)
+
+app.mount('#app')
