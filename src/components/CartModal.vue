@@ -15,26 +15,43 @@
           </div>
 
           <div v-else>
-            <table class="table table-striped">
+            <table class="table table-striped align-middle">
               <thead class="table-light">
                 <tr>
                   <th>Produit</th>
                   <th>Prix</th>
                   <th>Quantité</th>
                   <th>Total</th>
-                  <th>Action</th>
+                  <th></th>
                 </tr>
               </thead>
+              
               <tbody>
                 <tr v-for="item in cart.items" :key="item.id">
                   <td>{{ item.name }}</td>
-                  <td>{{ item.price }} €</td>
-                  <td>
-                    <input type="number" min="1" v-model.number="item.quantity" class="form-control"/>
+
+                  <td>{{ item.price.toFixed(2) }} €</td>
+
+                  <td style="max-width: 90px">
+                    <input
+                      type="number"
+                      min="1"
+                      v-model.number="item.quantity"
+                      class="form-control"
+                    />
                   </td>
-                  <td>{{ (item.price * item.quantity).toFixed(2) }} €</td>
+
+                  <td class="fw-bold">
+                    {{ (item.price * item.quantity).toFixed(2) }} €
+                  </td>
+
                   <td>
-                    <button class="btn btn-danger btn-sm" @click="remove(item.id)">Supprimer</button>
+                    <button
+                      class="btn btn-outline-danger btn-sm"
+                      @click="remove(item.id)"
+                    >
+                      Supprimer
+                    </button>
                   </td>
                 </tr>
               </tbody>
@@ -44,8 +61,15 @@
 
         <!-- Footer -->
         <div class="cart-modal-footer">
-          <div class="me-auto fw-bold">Total : {{ cart.totalPrice.toFixed(2) }} €</div>
-          <button class="btn btn-primary" :disabled="loading" @click="checkout">
+          <div class="me-auto fw-bold fs-5">
+            Total : {{ cart.totalPrice.toFixed(2) }} €
+          </div>
+
+          <button
+            class="btn btn-primary"
+            :disabled="loading || cart.items.length === 0"
+            @click="checkout"
+          >
             <span v-if="loading">Commande en cours...</span>
             <span v-else>Commander</span>
           </button>
@@ -56,32 +80,41 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useCartStore } from '@/stores/cart.js'
-import { useAuthStore } from '@/stores/auth'
-import axios from 'axios'
+import { ref } from "vue"
+import { useCartStore } from "@/stores/cart.js"
+import { useAuthStore } from "@/stores/auth"
+import { useRouter } from "vue-router"
+import api from '../services/api'
 
 defineProps({ visible: Boolean })
 
 const cart = useCartStore()
-const auth = useAuthStore()
+const auth = localStorage.getItem("token")
+const router = useRouter()
 const loading = ref(false)
 
 const remove = (id) => cart.remove(id)
 
 const checkout = async () => {
-  if (!auth.token) return alert("Veuillez vous connecter avant de commander")
-  if (cart.items.length === 0) return alert("Votre panier est vide")
+  
+  if (!auth) {
+    router.push({
+      path: "/login",
+      query: { redirect: "checkout" }
+    })
+    return
+  }
+
+  if (cart.items.length === 0) return
 
   loading.value = true
+
   try {
-    await axios.post(
-      'https://127.0.0.1:8000/api/orders',
-      cart.toOrderPayload(),
-      { headers: { Authorization: `Bearer ${auth.token}` } }
-    )
+    await api.post("/orders", cart.toOrderPayload())
+
     alert("Commande effectuée avec succès 🎉")
     cart.clear()
+    router.push("/client/dashboard")
   } catch (err) {
     console.error(err)
     alert(err.response?.data?.message || "Erreur serveur")
@@ -92,14 +125,14 @@ const checkout = async () => {
 </script>
 
 <style scoped>
-/* Overlay sombre mais lisible */
+/* Overlay clair et lisible */
 .cart-modal-backdrop {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0,0,0,0.35); /* léger sombre */
+  background-color: rgba(0, 0, 0, 0.35);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -108,17 +141,17 @@ const checkout = async () => {
   padding: 1rem;
 }
 
-/* Modal centré et scrollable */
+/* Modal */
 .cart-modal-dialog {
-  max-width: 800px;
+  max-width: 900px;
   width: 100%;
 }
 
-/* Contenu du modal */
+/* Contenu */
 .cart-modal-content {
-  background-color: #fff;
-  border-radius: 0.5rem;
-  box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.3);
+  background-color: #ffffff;
+  border-radius: 0.6rem;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.25);
   display: flex;
   flex-direction: column;
   max-height: 90vh;
@@ -132,14 +165,16 @@ const checkout = async () => {
   padding: 1rem;
   border-bottom: 1px solid #dee2e6;
 }
+
 .cart-modal-title {
   margin: 0;
+  font-weight: 600;
 }
+
 .cart-modal-close {
   background: none;
   border: none;
-  font-size: 1.5rem;
-  line-height: 1;
+  font-size: 1.7rem;
   cursor: pointer;
 }
 
@@ -152,7 +187,7 @@ const checkout = async () => {
 /* Footer */
 .cart-modal-footer {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
   padding: 1rem;
   border-top: 1px solid #dee2e6;
 }

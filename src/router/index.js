@@ -3,7 +3,6 @@ import { createRouter, createWebHistory } from "vue-router";
 
 // Pages publiques
 import Home from "@/views/Home.vue";
-import Register from "@/views/Register.vue";
 
 // Dashboard client
 import Orders from "@/views/dashboard/Orders.vue";
@@ -15,11 +14,10 @@ import AppLayout from "@/layouts/AppLayout.vue";
 import AuthLayout from "@/layouts/AuthLayout.vue";
 
 import Login from "@/views/Login.vue";
+import Register from "@/views/Register.vue";
 
 const routes = [
-  // =======================
-  // 🔹 Public avec layout AppLayout
-  // =======================
+
   {
     path: "/",
     component: AppLayout,
@@ -28,9 +26,7 @@ const routes = [
     ],
   },
 
-  // =======================
-  // 🔹 Auth pages (Login/Register) avec layout AuthLayout
-  // =======================
+
   {
     path: "/login",
     name: "Login",
@@ -38,13 +34,26 @@ const routes = [
   },
   {
     path: "/register",
-    component: AuthLayout,
-    children: [{ path: "", component: Register }],
+    name: "Register",
+    component: Register,
+    
   },
 
-  // =======================
-  // 🔹 Dashboard client
-  // =======================
+  {
+    path: "/client/dashboard",
+    name: "ClientDashboard",
+    component: () => import("@/views/dashboard/Dashboard.vue"),
+    
+  },
+
+  {
+    path: "/client/orders",
+    name: "ClientOrders",
+    component: () => import("@/views/dashboard/Orders.vue"),
+    
+  },
+
+ 
   {
     path: "/dashboard",
     component: AppLayout, // garde navbar/footer
@@ -56,9 +65,7 @@ const routes = [
     ],
   },
 
-  // =======================
-  // 🔹 Dashboard admin
-  // =======================
+
   {
     path: "/admin",
     component: AppLayout, // garde navbar/footer

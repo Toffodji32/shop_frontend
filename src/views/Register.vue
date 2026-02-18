@@ -1,33 +1,136 @@
 <template>
-  <form @submit.prevent="handleRegister">
-    <input v-model="name" placeholder="Nom" />
-    <input v-model="email" placeholder="Email" />
-    <input v-model="password" type="password" placeholder="Mot de passe" />
-    <button type="submit">S’inscrire</button>
-    <p v-if="error">{{ error }}</p>
-  </form>
+  <div class="bg-light min-vh-100 d-flex align-items-center">
+    <div class="container">
+      <div class="row justify-content-center">
+        <div class="col-lg-6">
+
+          <div class="card shadow-lg border-0 rounded-lg mt-5">
+            <div class="card-header">
+              <h3 class="text-center font-weight-light my-4">Créer un compte</h3>
+            </div>
+
+            <div class="card-body">
+              <form @submit.prevent="register">
+
+                <!-- NAME -->
+                <div class="form-floating mb-3">
+                  <input
+                    v-model="name"
+                    class="form-control"
+                    type="text"
+                    placeholder="Votre nom"
+                    required
+                  />
+                  <label>Nom</label>
+                </div>
+
+                <!-- EMAIL -->
+                <div class="form-floating mb-3">
+                  <input
+                    v-model="email"
+                    class="form-control"
+                    type="email"
+                    placeholder="name@example.com"
+                    required
+                  />
+                  <label>Email</label>
+                </div>
+
+                <!-- PASSWORD -->
+                <div class="form-floating mb-3">
+                  <input
+                    v-model="password"
+                    class="form-control"
+                    type="password"
+                    placeholder="Mot de passe"
+                    required
+                  />
+                  <label>Mot de passe</label>
+                </div>
+
+                <!-- CONFIRM -->
+                <div class="form-floating mb-3">
+                  <input
+                    v-model="confirmPassword"
+                    class="form-control"
+                    type="password"
+                    placeholder="Confirmer"
+                    required
+                  />
+                  <label>Confirmer mot de passe</label>
+                </div>
+
+                <!-- BUTTON -->
+                <div class="d-grid mt-4">
+                  <button class="btn btn-primary" :disabled="loading">
+                    <span v-if="loading">Création...</span>
+                    <span v-else>Créer un compte</span>
+                  </button>
+                </div>
+
+              </form>
+
+              <!-- ERROR -->
+              <div v-if="error" class="alert alert-danger mt-3">
+                {{ error }}
+              </div>
+            </div>
+
+            <div class="card-footer text-center py-3">
+              <div class="small">
+                <router-link to="/login">Déjà un compte ? Connexion</router-link>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useAuthStore } from '../stores/auth';
-import { useRouter } from 'vue-router';
+import { ref } from "vue"
+import axios from "axios"
+import { useRouter } from "vue-router"
 
-const auth = useAuthStore();
-const router = useRouter();
+const router = useRouter()
 
-const name = ref('');
-const email = ref('');
-const password = ref('');
-const error = ref('');
+const name = ref("")
+const email = ref("")
+const password = ref("")
+const confirmPassword = ref("")
+const error = ref("")
+const loading = ref(false)
 
-const handleRegister = async () => {
-  error.value = '';
-  try {
-    await auth.register(name.value, email.value, password.value);
-    router.push('/login'); // après inscription, redirige vers login
-  } catch (err) {
-    error.value = err.error || 'Erreur lors de l’inscription';
+const register = async () => {
+  error.value = ""
+
+  if (password.value !== confirmPassword.value) {
+    error.value = "Les mots de passe ne correspondent pas"
+    return
   }
-};
+
+  loading.value = true
+
+  try {
+    await axios.post("https://127.0.0.1:8000/api/register", {
+      name: name.value,
+      email: email.value,
+      password: password.value
+    })
+
+    alert("Compte créé avec succès 🎉")
+
+    // 🔥 redirection vers login
+    router.push("/login")
+
+  } catch (err) {
+    error.value = err.response?.data?.message || "Erreur serveur"
+  } finally {
+    loading.value = false
+  }
+}
 </script>
+
+
