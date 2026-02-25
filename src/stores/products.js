@@ -57,6 +57,7 @@ export const useProductStore = defineStore('products', {
       try {
         const res = await api.get('/categories')
         this.categories = res.data
+        return res.data
       } catch (err) {
         console.error(err.response?.data || err)
       }
@@ -101,7 +102,7 @@ export const useProductStore = defineStore('products', {
     async deleteProduct(id) {
       try {
         await api.delete(`/products/${id}`)
-        this.products = this.products.filter(p => p.id !== id)
+        this.products = this.products.filter((p) => p.id !== id)
       } catch (err) {
         console.error(err.response?.data || err)
       }

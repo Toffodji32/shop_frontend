@@ -12,24 +12,15 @@
                 <i class="fas fa-bars"></i>
             </button>
 
-            <!-- BARRE DE RECHERCHE -->
-            <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
-                <div class="input-group">
-                    <input class="form-control" type="text" placeholder="Search for..." aria-label="Search for..." aria-describedby="btnNavbarSearch" />
-                    <button class="btn btn-primary" id="btnNavbarSearch" type="button"><i class="fas fa-search"></i></button>
-                </div>
-            </form>
-
             <!-- Navbar user -->
-            <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
+            <ul class="navbar-nav ms-auto me-3 me-lg-4">
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
                         <i class="fas fa-user fa-fw"></i>
                     </a>
 
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item">Settings</a></li>
-                        <li><a class="dropdown-item">Activity Log</a></li>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><a class="dropdown-item" @click="$router.push('/settings')">Settings</a></li>
                         <li>
                             <hr class="dropdown-divider" />
                         </li>
@@ -60,11 +51,6 @@
                         </div>
                     </div>
 
-                    <div class="sb-sidenav-footer">
-                        <div class="small">Logged in as:</div>
-                        {{ auth.user?.email }}
-                    </div>
-
                 </nav>
             </div>
 
@@ -91,10 +77,12 @@
 </template>
 
 <script setup>
-import { ref } from "vue"
 import { useAuthStore } from "@/stores/auth"
+import { ref } from "vue"
+import { useRouter } from "vue-router"
 
 const auth = useAuthStore()
+const router = useRouter()
 
 const sidebarCollapsed = ref(false)
 
@@ -104,6 +92,7 @@ const toggleSidebar = () => {
 
 const logout = () => {
     auth.logout()
+    router.push("/login")
 }
 </script>
 

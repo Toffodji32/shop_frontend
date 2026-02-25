@@ -1,4 +1,3 @@
-// stores/auth.js
 import { defineStore } from 'pinia'
 import api from '../services/api'
 
@@ -56,6 +55,43 @@ export const useAuthStore = defineStore('auth', {
         localStorage.setItem('user', JSON.stringify(this.user))
 
         return res.data
+      } catch (err) {
+        throw err.response?.data || err
+      } finally {
+        this.loading = false
+      }
+    },
+
+    // ========================
+    // CURRENT USER
+    // ========================
+    async currentUser() {
+      try {
+        const res = await api.get('/me')
+        this.user = res.data
+        localStorage.setItem('user', JSON.stringify(this.user))
+        return this.user
+      } catch (err) {
+        console.warn("Erreur lors de la récupération de l'utilisateur courant", err)
+        this.logout()
+        throw err.response?.data || err
+      }
+    },
+
+    // ========================
+    // UPDATE USER (SETTINGS)
+    // ========================
+    async updateUser(data) {
+      try {
+        this.loading = true
+
+        const res = await api.put('/me', data)
+
+        this.user = res.data.user
+        localStorage.setItem('user', JSON.stringify(this.user))
+
+        return res.data
+
       } catch (err) {
         throw err.response?.data || err
       } finally {

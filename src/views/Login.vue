@@ -5,11 +5,13 @@
         <div class="col-lg-5">
           <div class="card shadow-lg border-0 rounded-lg mt-5">
             <div class="card-header">
-              <h3 class="text-center font-weight-light my-4">Connexion</h3>
+              <router-link to="/" class="text-decoration-none">
+                <h3 class="text-center font-weight-light my-4">Se connecter</h3>
+              </router-link>
             </div>
 
             <div class="card-body">
-              <form @submit.prevent="login">
+              <form @submit.prevent="handleLogin">
                 <!-- Email -->
                 <div class="form-floating mb-3">
                   <input v-model="email" class="form-control" type="email" placeholder="name@example.com" required />
@@ -23,11 +25,8 @@
                 </div>
 
                 <!-- Error -->
-                <div v-if="status" class="alert alert-success">
-                  Connexion réussie !
-                </div>
                 <div v-if="status === false" class="alert alert-danger">
-                  Email ou mot de passe incorrect
+                  {{ errorMessage }}
                 </div>
 
                 <!-- Button -->
@@ -45,6 +44,7 @@
                 <router-link to="/register">
                   Créer un compte
                 </router-link>
+
               </div>
             </div>
           </div>
@@ -55,54 +55,42 @@
 </template>
 
 <script setup>
-import { useAuthStore } from "@/stores/auth"
 import { ref } from "vue"
-import { useRoute, useRouter } from "vue-router"
-import api from '../services/api'
+import { useRouter } from "vue-router"
+import { useAuthStore } from "@/stores/auth"
+
+const auth = useAuthStore()
+const router = useRouter()
 
 const email = ref("")
 const password = ref("")
-const error = ref("")
 const loading = ref(false)
 const status = ref(null)
+const errorMessage = ref("")
 
-const router = useRouter()
-const route = useRoute()
-const auth = useAuthStore()
-
-let token = localStorage.getItem("token")
-
-const login = async () => {
-  error.value = ""
+const handleLogin = async () => {
   loading.value = true
+  status.value = null
+  errorMessage.value = ""
 
   try {
-    const res = await api.post("login",
-      {
-        email: email.value,
-        password: password.value,
-      }
-    )
+    // 🔹 Appel à la fonction login du store
+    await auth.login(email.value, password.value)
 
-    if(res.status === 200) {
-      token = localStorage.setItem("token", res.data.token)
-      status.value = true
-      router.push("/client/dashboard")  
-    }
+    // 🔹 Charger les infos utilisateur (important)
+    await auth.currentUser()
 
 
 
-    // 🔥 Redirection intelligente
-    /* if (route.query.redirect === "checkout") {
-      router.push("/checkout")
-    } else if (auth.isAdmin) {
-      router.push("/admin/dashboard")
-    } else {
-      router.push("/client/dashboard")
-    } */
+    // 🔹 Redirection intelligente selon rôle
+/*     const dashboardRoute = auth.isAdmin ? "/admin/orders" : "/client/orders"
+ */    router.replace("/dashboard")
 
+    status.value = true
   } catch (err) {
+    console.error(err)
     status.value = false
+    errorMessage.value = err.error || "Email ou mot de passe incorrect"
   } finally {
     loading.value = false
   }

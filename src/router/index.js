@@ -4,28 +4,30 @@ import { createRouter, createWebHistory } from "vue-router";
 // Pages publiques
 import Home from "@/views/Home.vue";
 
-// Dashboard client
-import Orders from "@/views/dashboard/Orders.vue";
-
 // Dashboard admin
 
 // Layouts
 import AppLayout from "@/layouts/AppLayout.vue";
-import AuthLayout from "@/layouts/AuthLayout.vue";
+import AdminLayout from "@/layouts/AdminLayout.vue";
 
 import Login from "@/views/Login.vue";
 import Register from "@/views/Register.vue";
+import Dashboard from "@/views/dashboard/Dashboard.vue";
+import Categories from "@/views/dashboard/Categories.vue";
+import Produits from "@/views/dashboard/Produits.vue";
+import AdminUser from "@/views/dashboard/AdminUser.vue";
+import AdminOrder from "@/views/dashboard/AdminOrder.vue";
+import AdminSales from "@/views/dashboard/AdminSales.vue";
+import Settings from "@/views/dashboard/Settings.vue";
+import AdminRole from "@/views/dashboard/AdminRole.vue";
+import OrdersCopy from "@/views/dashboard/Orders copy.vue";
 
 const routes = [
-
   {
     path: "/",
     component: AppLayout,
-    children: [
-      { path: "", component: Home },
-    ],
+    children: [{ path: "", component: Home }],
   },
-
 
   {
     path: "/login",
@@ -36,51 +38,66 @@ const routes = [
     path: "/register",
     name: "Register",
     component: Register,
-    
   },
-
-  {
-    path: "/client/dashboard",
-    name: "ClientDashboard",
-    component: () => import("@/views/dashboard/Dashboard.vue"),
-    
-  },
-
-  {
-    path: "/client/orders",
-    name: "ClientOrders",
-    component: () => import("@/views/dashboard/Orders.vue"),
-    
-  },
-
- 
   {
     path: "/dashboard",
-    component: AppLayout, // garde navbar/footer
-    meta: { auth: true },
+    component: AdminLayout,
+    meta: { requiresAuth: true }, // Toutes les routes enfants nécessitent authentification
     children: [
-      { path: "", redirect: "/dashboard/orders" }, // redirection par défaut
-      { path: "orders", component: Orders },
-      // autres pages dashboard client ici
-    ],
-  },
-
-
-  {
-    path: "/admin",
-    component: AppLayout, // garde navbar/footer
-    meta: { admin: true },
-    children: [
-      { path: "", redirect: "/admin/products" },
       {
-        path: "products",
-        component: () => import("@/views/Admin/Products.vue"),
+        path: "",
+        name: "Dashboard",
+        component: Dashboard,
+        meta: { roles: ["ROLE_ADMIN", "ROLE_USER"] },
+      },
+      {
+        path: "categories",
+        name: "Categories",
+        component: Categories,
+        meta: { roles: ["ROLE_ADMIN"] },
+      },
+      {
+        path: "produits",
+        name: "Produits",
+        component: Produits,
+        meta: { roles: ["ROLE_ADMIN"] },
+      },
+      {
+        path: "users",
+        name: "Users",
+        component: AdminUser,
+        meta: { roles: ["ROLE_ADMIN"] },
       },
       {
         path: "orders",
-        component: () => import("@/views/Admin/Orders.vue"),
+        name: "Orders",
+        component: AdminOrder,
+        meta: { roles: ["ROLE_ADMIN"] },
       },
-      // autres pages admin ici
+      {
+        path: "sales",
+        name: "Sales",
+        component: AdminSales,
+        meta: { roles: ["ROLE_ADMIN"] },
+      },
+      {
+        path: "roles",
+        name: "Roles",
+        component: AdminRole,
+        meta: { roles: ["ROLE_ADMIN"] },
+      },
+      {
+        path: "orders-copy",
+        name: "Orders Copy",
+        component: OrdersCopy,
+        meta: { roles: ["ROLE_USER"] },
+      },
+      {
+        path: "settings",
+        name: "Settings",
+        component: Settings,
+        meta: { roles: ["ROLE_ADMIN", "ROLE_USER"] },
+      },
     ],
   },
 ];
@@ -90,21 +107,29 @@ const router = createRouter({
   routes,
 });
 
-// 🔐 Protection globale des routes
 router.beforeEach((to, from, next) => {
   const auth = useAuthStore();
 
-  // Pages nécessitant authentification
-  if (to.meta.auth && !auth.isAuthenticated()) {
+  const isLoggedIn = auth.isAuthenticated;
+  const userRoles = auth.user?.roles || [];
+
+  // 1️⃣ Si la route nécessite authentification
+  if (to.meta.requiresAuth && !isLoggedIn) {
     return next("/login");
   }
 
-  // Pages nécessitant rôle admin
-  if (
-    to.meta.admin &&
-    (!auth.isAuthenticated() || !auth.user?.roles.includes("ROLE_ADMIN"))
-  ) {
-    return next("/"); // redirection si pas admin
+  // 2️⃣ Si la route a des rôles définis
+  if (to.meta.roles) {
+    const hasAccess = to.meta.roles.some((role) => userRoles.includes(role));
+
+    if (!hasAccess) {
+      return next("/dashboard");
+    }
+  }
+
+  //3️⃣ Bloquer login/register si connecté
+  if ((to.name === "Login" || to.name === "Register") && isLoggedIn) {
+    return next("/dashboard");
   }
 
   next();
