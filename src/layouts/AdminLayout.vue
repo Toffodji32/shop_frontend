@@ -47,7 +47,11 @@
                     <div class="sb-sidenav-menu">
                         <div class="nav">
                             <div class="sb-sidenav-menu-heading">Core</div>
-                            <router-link class="nav-link" to="/dashboard">
+                            <router-link v-if="isAdmin()" class="nav-link" to="/dashboard">
+                                <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                                Dashboard
+                            </router-link>
+                            <router-link v-if="!isAdmin()" class="nav-link" to="/dashboard/client">
                                 <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
                                 Dashboard
                             </router-link>

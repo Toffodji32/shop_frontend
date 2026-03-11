@@ -1,5 +1,4 @@
 <template>
-
   <div class="container mt-4">
     <h2 class="mb-4">Mes commandes</h2>
     <ol class="breadcrumb mb-4">
@@ -23,8 +22,8 @@
     </div>
 
     <div v-else>
-      <table class="table table-hover table-bordered">
-        <thead class="table-dark">
+      <table class="table table-bordered table-striped">
+        <thead >
           <tr>
             <th>ID</th>
             <th>Date</th>
@@ -38,11 +37,15 @@
             <td>{{ order.id }}</td>
             <td>{{ formatDate(order.createdAt) }}</td>
             <td>
-              <span class="badge" :class="order.status === 'Livrée' ? 'bg-success' : 'bg-warning text-dark'">
+              <span class="badge" :class="{
+                'bg-warning ': order.status === 'En cours',
+                'bg-success ': order.status === 'Livrée',
+                'bg-danger ': order.status === 'Rejetée'
+              }">
                 {{ order.status }}
               </span>
             </td>
-            <td>{{ order.totalPrice.toFixed(2) }} €</td>
+            <td>{{ order.totalPrice.toFixed(2) }} FCFA</td>
             <td>
               <button class="btn btn-sm btn-primary" @click="openModal(order)">
                 Voir
@@ -70,6 +73,7 @@
     </div>
   </div>
 
+  <!-- Modal détails -->
   <div class="modal fade" tabindex="-1" :class="{ show: modalVisible }" style="display: block" v-if="modalVisible"
     @click.self="closeModal">
     <div class="modal-dialog modal-lg">
@@ -92,11 +96,11 @@
               </tr>
             </thead>
             <tbody>
-              <tr v-for="item in selectedOrder.orderItems" :key="item.id">
-                <td>{{ item.produit.name }}</td>
-                <td>{{ item.price.toFixed(2) }} €</td>
+              <tr v-for="item in selectedOrder?.items" :key="item.id">
+                <td>{{ item.product }}</td>
+                <td>{{ item.price}} FCFA</td>
                 <td>{{ item.quantity }}</td>
-                <td>{{ (item.price * item.quantity).toFixed(2) }} €</td>
+                <td>{{ (item.price * item.quantity).toFixed(2) }} FCFA</td>
               </tr>
             </tbody>
           </table>
@@ -110,7 +114,6 @@
       </div>
     </div>
   </div>
-
 </template>
 
 <script setup>
@@ -120,18 +123,10 @@ import { useAuthStore } from "@/stores/auth"
 
 const store = useOrderStore();
 const loading = ref(true);
-const orders = ref([]);
 const searchQuery = ref("");
 const currentPage = ref(1);
 const perPage = 10;
-const userConnected = ref(null);
 const auth = useAuthStore();
-
-useAuthStore().currentUser().then(user => {
-  userConnected.value = user;
-})
-
-
 
 // Modal
 const modalVisible = ref(false);
@@ -143,10 +138,9 @@ const openModal = (order) => {
 };
 const closeModal = () => (modalVisible.value = false);
 
-// Fetch commandes
+// Fetch commandes utilisateur
 onMounted(async () => {
-  await store.fetchMyOrders();
-  orders.value = store.orders;
+  await store.fetchMyOrders();  // récupère uniquement les commandes du client
   loading.value = false;
 });
 
@@ -155,8 +149,8 @@ const formatDate = (date) => new Date(date).toLocaleString();
 
 // Filtre recherche
 const filteredOrders = computed(() => {
-  if (!searchQuery.value) return orders.value;
-  return orders.value.filter(
+  if (!searchQuery.value) return store.myOrders;
+  return store.myOrders.filter(
     (o) =>
       o.id.toString().includes(searchQuery.value) ||
       o.status.toLowerCase().includes(searchQuery.value.toLowerCase())

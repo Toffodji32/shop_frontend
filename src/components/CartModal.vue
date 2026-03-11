@@ -25,31 +25,23 @@
                   <th></th>
                 </tr>
               </thead>
-              
+
               <tbody>
                 <tr v-for="item in cart.items" :key="item.id">
                   <td>{{ item.name }}</td>
 
-                  <td>{{ item.price.toFixed(2) }} €</td>
+                  <td>{{ item.price.toFixed(2) }} FCFA</td>
 
                   <td style="max-width: 90px">
-                    <input
-                      type="number"
-                      min="1"
-                      v-model.number="item.quantity"
-                      class="form-control"
-                    />
+                    <input type="number" min="1" v-model.number="item.quantity" class="form-control" />
                   </td>
 
                   <td class="fw-bold">
-                    {{ (item.price * item.quantity).toFixed(2) }} €
+                    {{ (item.price * item.quantity).toFixed(2) }} FCFA
                   </td>
 
                   <td>
-                    <button
-                      class="btn btn-outline-danger btn-sm"
-                      @click="remove(item.id)"
-                    >
+                    <button class="btn btn-outline-danger btn-sm" @click="remove(item.id)">
                       Supprimer
                     </button>
                   </td>
@@ -62,17 +54,16 @@
         <!-- Footer -->
         <div class="cart-modal-footer">
           <div class="me-auto fw-bold fs-5">
-            Total : {{ cart.totalPrice.toFixed(2) }} €
+            Total : {{ cart.totalPrice.toFixed(2) }} FCFA
           </div>
 
-          <button
-            class="btn btn-primary"
-            :disabled="loading || cart.items.length === 0"
-            @click="checkout"
-          >
-            <span v-if="loading">Commande en cours...</span>
-            <span v-else>Commander</span>
+          <button id="checkout-btn" class="btn btn-primary" :disabled="loading || cart.items.length === 0"
+            @click="checkout">
+            Commander
           </button>
+
+          <!-- 🔹 bouton FedaPay invisible -->
+          <button id="pay-btn" style="display:none;"></button>
         </div>
       </div>
     </div>
@@ -96,12 +87,9 @@ const loading = ref(false)
 const remove = (id) => cart.remove(id)
 
 const checkout = async () => {
-  
+
   if (!auth) {
-    router.push({
-      path: "/login",
-      query: { redirect: "checkout" }
-    })
+    router.push({ path: "/login", query: { redirect: "checkout" } })
     return
   }
 
@@ -110,14 +98,35 @@ const checkout = async () => {
   loading.value = true
 
   try {
-    await api.post("/orders", cart.toOrderPayload())
+    // 🔹 récupérer info utilisateur
+    const userStore = useAuthStore()
+    const user = userStore.user || { email: 'client@example.com', name: 'Client' }
 
-    alert("Commande effectuée avec succès 🎉")
-    cart.clear()
-    router.push("/client/dashboard")
+    // 🔹 montant total (FCFA)
+    const totalAmount = Math.round(cart.totalPrice)  // FedaPay veut un entier
+
+    // 🔹 initialiser FedaPay
+    FedaPay.init('#pay-btn', {
+      public_key: 'pk_sandbox_hJix3Vgf3L9UNj3Fs4EObNRo', 
+      transaction: {
+        amount: totalAmount,
+        description: 'Achat sur mon site'
+      },
+      customer: {
+        email: user.email,
+        firstname: user.name.split(' ')[0] || 'Client',
+        lastname: user.name.split(' ')[1] || ''
+      },
+      
+
+    })
+
+    // 🔹 lancer le paiement
+    document.querySelector('#pay-btn').click()
+
   } catch (err) {
     console.error(err)
-    alert(err.response?.data?.message || "Erreur serveur")
+    alert("Erreur lors de la commande")
   } finally {
     loading.value = false
   }

@@ -5,6 +5,7 @@
             <h2 class="title">Paramètres du compte</h2>
 
             <form @submit.prevent="updateUser" class="settings-form">
+
                 <!-- Nom -->
                 <div class="form-group">
                     <label for="name">Nom</label>
@@ -19,18 +20,32 @@
 
                 <hr />
 
-                <!-- Ancien mot de passe -->
-                <div class="form-group">
+                <!-- Mot de passe actuel -->
+                <div class="form-group password-field">
                     <label for="currentPassword">Mot de passe actuel</label>
-                    <input id="currentPassword" type="password" v-model="form.currentPassword"
-                        placeholder="Entrez votre mot de passe actuel" />
+
+                    <div class="password-input">
+                        <input id="currentPassword" :type="showCurrentPassword ? 'text' : 'password'"
+                            v-model="form.currentPassword" placeholder="Entrez votre mot de passe actuel" />
+
+                        <span class="toggle-password" @click="showCurrentPassword = !showCurrentPassword">
+                            {{ showCurrentPassword ? "🙈" : "👁" }}
+                        </span>
+                    </div>
                 </div>
 
                 <!-- Nouveau mot de passe -->
-                <div class="form-group">
+                <div class="form-group password-field">
                     <label for="newPassword">Nouveau mot de passe</label>
-                    <input id="newPassword" type="password" v-model="form.newPassword"
-                        placeholder="Entrez un nouveau mot de passe" />
+
+                    <div class="password-input">
+                        <input id="newPassword" :type="showNewPassword ? 'text' : 'password'" v-model="form.newPassword"
+                            placeholder="Entrez un nouveau mot de passe" />
+
+                        <span class="toggle-password" @click="showNewPassword = !showNewPassword">
+                            {{ showNewPassword ? "🙈" : "👁" }}
+                        </span>
+                    </div>
                 </div>
 
                 <button class="btn-submit" :disabled="loading">
@@ -39,6 +54,7 @@
 
                 <div v-if="successMessage" class="alert success">{{ successMessage }}</div>
                 <div v-if="errorMessage" class="alert error">{{ errorMessage }}</div>
+
             </form>
         </div>
     </div>
@@ -52,9 +68,13 @@ import ClientLayout from '@/layouts/ClientLayout.vue'
 import AdminLayout from '@/layouts/AdminLayout.vue'
 
 const auth = useAuthStore()
+
 const loading = ref(false)
 const successMessage = ref('')
 const errorMessage = ref('')
+
+const showCurrentPassword = ref(false)
+const showNewPassword = ref(false)
 
 const form = ref({
     name: '',
@@ -64,7 +84,9 @@ const form = ref({
 })
 
 // Déterminer le layout selon le rôle
-const layoutComponent = computed(() => auth.isAdmin ? AdminLayout : ClientLayout)
+const layoutComponent = computed(() =>
+    auth.isAdmin ? AdminLayout : ClientLayout
+)
 
 // Charger l’utilisateur
 onMounted(async () => {
@@ -73,17 +95,19 @@ onMounted(async () => {
         form.value.name = user.name
         form.value.email = user.email
     } catch (err) {
-        console.warn('Impossible de récupérer l\'utilisateur courant')
+        console.warn("Impossible de récupérer l'utilisateur courant")
     }
 })
 
-// Fonction de mise à jour
+// Mise à jour utilisateur
 const updateUser = async () => {
+
     successMessage.value = ''
     errorMessage.value = ''
     loading.value = true
 
     try {
+
         const payload = {
             name: form.value.name,
             email: form.value.email,
@@ -91,31 +115,38 @@ const updateUser = async () => {
             password: form.value.newPassword
         }
 
-        const res = await auth.updateUser(payload)
+        await auth.updateUser(payload)
+
         form.value.currentPassword = ''
         form.value.newPassword = ''
+
         successMessage.value = 'Profil mis à jour avec succès !'
+
     } catch (err) {
-        errorMessage.value = err?.error || 'Erreur lors de la mise à jour'
+
+        errorMessage.value =
+            err?.error || 'Erreur lors de la mise à jour'
+
     } finally {
+
         loading.value = false
+
     }
 }
 </script>
 
 <style scoped>
-/* Wrapper pour centrer le contenu */
+/* Wrapper */
 .settings-wrapper {
     display: flex;
     justify-content: center;
     align-items: flex-start;
     padding: 3rem 1rem;
     min-height: calc(100vh - 80px);
-    /* ajuster selon ton header */
     background: #f5f6fa;
 }
 
-/* Carte du formulaire */
+/* Card */
 .settings-card {
     background: #fff;
     border-radius: 12px;
@@ -130,7 +161,6 @@ const updateUser = async () => {
     transform: translateY(-2px);
 }
 
-/* Titres et formulaire */
 .title {
     font-size: 1.7rem;
     margin-bottom: 1.5rem;
@@ -162,7 +192,25 @@ const updateUser = async () => {
     outline: none;
 }
 
-/* Bouton */
+/* Password input */
+.password-input {
+    position: relative;
+}
+
+.password-input input {
+    width: 100%;
+}
+
+.toggle-password {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 18px;
+}
+
+/* Button */
 .btn-submit {
     width: 100%;
     padding: 0.7rem;

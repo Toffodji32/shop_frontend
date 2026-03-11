@@ -66,7 +66,8 @@ export const useCartStore = defineStore('cart', {
         items: this.items.map(item => ({
           product: item.id,
           quantity: item.quantity
-        }))
+        })),
+        total: this.totalPrice
       }
     }
   }

@@ -33,12 +33,26 @@ export const useRoleStore = defineStore("roles", {
       }
     },
 
-    // 🔹 Assigner un rôle à un utilisateur
+    // 🔹 Assigner un rôle à un utilisateur (ancienne méthode)
     async assignRole(userId, roleId) {
       try {
         const res = await api.post("/admin/roles/assign", {
           user_id: userId,
           role_id: roleId,
+        });
+        return res.data;
+      } catch (err) {
+        console.error(err.response?.data || err);
+        throw err;
+      }
+    },
+
+    // 🔥 🔥 🔥 NOUVELLE MÉTHODE (IMPORTANT)
+    // 🔹 Remplacer complètement les rôles d’un utilisateur
+    async updateUserRoles(userId, roles) {
+      try {
+        const res = await api.put(`/admin/roles/user/${userId}`, {
+          roles: roles, // tableau d’IDs
         });
         return res.data;
       } catch (err) {

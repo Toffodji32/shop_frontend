@@ -21,6 +21,7 @@ import AdminSales from "@/views/dashboard/AdminSales.vue";
 import Settings from "@/views/dashboard/Settings.vue";
 import AdminRole from "@/views/dashboard/AdminRole.vue";
 import OrdersCopy from "@/views/dashboard/Orders copy.vue";
+import ClientDashboard from "@/views/dashboard/ClientDashboard.vue";
 
 const routes = [
   {
@@ -48,7 +49,13 @@ const routes = [
         path: "",
         name: "Dashboard",
         component: Dashboard,
-        meta: { roles: ["ROLE_ADMIN", "ROLE_USER"] },
+        meta: { roles: ["ROLE_ADMIN"] },
+      },
+      {
+        path: "client",
+        name: "ClientDashboard",
+        component: ClientDashboard,
+        meta: { roles: ["ROLE_USER"] },
       },
       {
         path: "categories",
@@ -123,7 +130,16 @@ router.beforeEach((to, from, next) => {
     const hasAccess = to.meta.roles.some((role) => userRoles.includes(role));
 
     if (!hasAccess) {
-      return next("/dashboard");
+      // redirige selon le rôle de l'utilisateur
+      if (userRoles.includes("ROLE_ADMIN")) {
+        if (to.path !== "/dashboard") return next("/dashboard");
+        else return next();
+      } else if (userRoles.includes("ROLE_USER")) {
+        if (to.path !== "/dashboard/client") return next("/dashboard/client");
+        else return next();
+      } else {
+        return next("/login"); // pas de rôle reconnu
+      }
     }
   }
 
