@@ -20,7 +20,7 @@
         </h5>
 
         <p class="product-price">
-          {{ product.price }} €
+          {{ product.price }} FCFA
         </p>
 
       </div>

@@ -77,6 +77,7 @@ import { useAuthStore } from "@/stores/auth"
 import { useRouter } from "vue-router"
 import api from '../services/api'
 
+
 defineProps({ visible: Boolean })
 
 const cart = useCartStore()
@@ -107,7 +108,7 @@ const checkout = async () => {
 
     // 🔹 initialiser FedaPay
     FedaPay.init('#pay-btn', {
-      public_key: 'pk_sandbox_hJix3Vgf3L9UNj3Fs4EObNRo', 
+      public_key: 'pk_sandbox_hJix3Vgf3L9UNj3Fs4EObNRo',
       transaction: {
         amount: totalAmount,
         description: 'Achat sur mon site'
@@ -117,7 +118,33 @@ const checkout = async () => {
         firstname: user.name.split(' ')[0] || 'Client',
         lastname: user.name.split(' ')[1] || ''
       },
-      
+
+      onComplete: async (response) => {
+        console.log("Fedapay response:", response)
+        const transaction = response.transaction
+
+        try {
+          await api.post('/orders', {
+            transaction_id: transaction.id,
+            items: cart.items.map(item => ({
+              id: item.id,
+              quantity: item.quantity
+            }))
+          })
+
+          alert("Paiement réussi et commande enrégistrée")
+
+          cart.clear()
+          router.push('/')
+
+        }catch (error) {
+          console.error(error)
+          alert("Erreur lors de l'enregistrement de la commande")
+        }
+        
+        
+      }
+
 
     })
 
