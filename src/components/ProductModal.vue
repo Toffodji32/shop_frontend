@@ -21,7 +21,7 @@
             </h2>
 
             <p class="price">
-              {{ product.price }} €
+              {{ product.price }} FCFA
             </p>
 
             <p class="description">

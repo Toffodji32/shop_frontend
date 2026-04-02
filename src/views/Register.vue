@@ -91,7 +91,7 @@
 
 <script setup>
 import { ref } from "vue"
-import axios from "axios"
+import api from "@/services/api.js"
 import { useRouter } from "vue-router"
 
 const router = useRouter()
@@ -114,7 +114,7 @@ const register = async () => {
   loading.value = true
 
   try {
-    await axios.post("https://127.0.0.1:8000/api/register", {
+    await api.post("/register", {
       name: name.value,
       email: email.value,
       password: password.value
