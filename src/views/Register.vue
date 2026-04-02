@@ -95,7 +95,7 @@ import { useAuthStore } from "@/stores/auth"
 import { useRouter } from "vue-router"
 
 const router = useRouter()
-const authStore = useAuthStore()
+const auth = useAuthStore()
 
 const name = ref("")
 const email = ref("")
@@ -115,7 +115,7 @@ const register = async () => {
   loading.value = true
 
   try {
-    await authStore.register({
+    await auth.register({
       name: name.value,
       email: email.value,
       password: password.value
