@@ -90,8 +90,8 @@
 </template>
 
 <script setup>
-import { ref } from "vue"
 import { useAuthStore } from "@/stores/auth"
+import { ref } from "vue"
 import { useRouter } from "vue-router"
 
 const router = useRouter()
@@ -115,11 +115,11 @@ const register = async () => {
   loading.value = true
 
   try {
-    await auth.register({
-      name: name.value,
-      email: email.value,
-      password: password.value
-    })
+    await auth.register(
+     name.value,
+      email.value,
+      password.value
+    )
 
     alert("Compte créé avec succès 🎉")
 
