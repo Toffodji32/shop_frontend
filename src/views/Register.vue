@@ -91,10 +91,11 @@
 
 <script setup>
 import { ref } from "vue"
-import api from "@/services/api.js"
+import { useAuthStore } from "@/stores/auth"
 import { useRouter } from "vue-router"
 
 const router = useRouter()
+const authStore = useAuthStore()
 
 const name = ref("")
 const email = ref("")
@@ -114,7 +115,7 @@ const register = async () => {
   loading.value = true
 
   try {
-    await api.post("/register", {
+    await authStore.register({
       name: name.value,
       email: email.value,
       password: password.value
