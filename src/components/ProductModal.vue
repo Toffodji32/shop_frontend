@@ -1,10 +1,10 @@
 <template>
-  <div class="modal-backdrop" @click.self="emit('close')">
+  <div class="modal-backdrop" @click.self="$emit('close')">
     <div class="modal-dialog">
       <div class="modal-content">
 
         <!-- bouton fermer -->
-        <button class="modal-close" @click="emit('close')">✕</button>
+        <button class="modal-close" @click="$emit('close')">✕</button>
 
         <div class="modal-body modal-horizontal">
 
@@ -45,7 +45,7 @@
 import { useCartStore } from '@/stores/cart.js'
 import Swal from "sweetalert2";
 
-const emit = defineEmits(['close'])
+
 const cartStore = useCartStore();
 
 const props = defineProps({
