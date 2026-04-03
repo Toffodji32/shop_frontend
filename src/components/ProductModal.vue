@@ -53,7 +53,7 @@ const props = defineProps({
 });
 
 const addToCart = () => {
-  cartStore.addToCart(props.product);
+  cartStore.add(props.product);
   Swal.fire({
     title: "Produit ajouté !",
     text: `${props.product.name} a été ajouté au panier.`,
