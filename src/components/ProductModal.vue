@@ -1,8 +1,8 @@
 <template>
   <div class="modal-backdrop" @click.self="$emit('close')">
     <div class="modal-dialog">
+      
       <div class="modal-content">
-
         <!-- bouton fermer -->
         <button class="modal-close" @click="$emit('close')">✕</button>
 
@@ -42,7 +42,7 @@
 </template>
 
 <script setup>
-import { useCartStore } from '@/stores/cart.js'
+import { useCartStore } from '@/stores/cart.js';
 import Swal from "sweetalert2";
 
 
@@ -65,8 +65,6 @@ const addToCart = () => {
 
 <style scoped>
 
-/* OVERLAY */
-
 .modal-backdrop{
   position:fixed;
   top:0;
@@ -82,8 +80,6 @@ const addToCart = () => {
   animation:fadeIn 0.3s ease;
 }
 
-/* MODAL */
-
 .modal-dialog{
   max-width:850px;
   width:92%;
@@ -98,12 +94,11 @@ const addToCart = () => {
   animation:modalZoom 0.35s ease;
 }
 
-/* CLOSE BUTTON */
-
+/* CLOSE BUTTON — complètement à l'intérieur */
 .modal-close{
   position:absolute;
-  top:18px;
-  right:18px;
+  top:12px;
+  right:12px;
   border:none;
   background:#f5f5f5;
   width:34px;
@@ -111,14 +106,18 @@ const addToCart = () => {
   border-radius:50%;
   cursor:pointer;
   font-size:14px;
+  font-weight:bold;
+  z-index:100;
   transition:0.2s;
+  display:flex;
+  align-items:center;
+  justify-content:center;
 }
 
 .modal-close:hover{
-  background:#e8e8e8;
+  background:#e0e0e0;
+  transform:scale(1.1);
 }
-
-/* BODY */
 
 .modal-body{
   padding:35px;
@@ -129,8 +128,6 @@ const addToCart = () => {
   gap:40px;
   align-items:flex-start;
 }
-
-/* IMAGE */
 
 .modal-image{
   flex:1;
@@ -153,21 +150,16 @@ const addToCart = () => {
   transform:scale(1.05);
 }
 
-/* TEXT */
-
 .modal-text{
   flex:1;
+  padding-top:10px;
 }
-
-/* TITLE */
 
 .product-title{
   font-size:24px;
   font-weight:700;
   margin-bottom:10px;
 }
-
-/* PRICE */
 
 .price{
   font-size:26px;
@@ -176,18 +168,14 @@ const addToCart = () => {
   margin-bottom:15px;
 }
 
-/* DESCRIPTION */
-
 .description{
   color:#6c757d;
   line-height:1.6;
   margin-bottom:25px;
 }
 
-/* ADD CART BUTTON */
-
 .btn-add-cart{
-  background:#0d6efd;
+  background:#fd7e14;
   color:white;
   border:none;
   padding:12px 22px;
@@ -199,41 +187,27 @@ const addToCart = () => {
 }
 
 .btn-add-cart:hover{
-  background:#0b5ed7;
+  background:#e46c0a;
   transform:translateY(-2px);
 }
 
-/* ANIMATIONS */
-
 @keyframes modalZoom{
-  from{
-    transform:scale(0.85);
-    opacity:0;
-  }
-  to{
-    transform:scale(1);
-    opacity:1;
-  }
+  from{ transform:scale(0.85); opacity:0; }
+  to{ transform:scale(1); opacity:1; }
 }
 
 @keyframes fadeIn{
-  from{opacity:0;}
-  to{opacity:1;}
+  from{ opacity:0; }
+  to{ opacity:1; }
 }
-
-/* MOBILE */
 
 @media (max-width:768px){
-
-.modal-horizontal{
-  flex-direction:column;
-  text-align:center;
+  .modal-horizontal{
+    flex-direction:column;
+    text-align:center;
+  }
+  .modal-img{
+    max-height:250px;
+  }
 }
-
-.modal-img{
-  max-height:250px;
-}
-
-}
-
 </style>

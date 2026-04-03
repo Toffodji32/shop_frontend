@@ -3,7 +3,7 @@
     <div class="card product-card h-100">
 
       <!-- badge -->
-      <span class="badge bg-danger product-badge">
+      <span class="badge bg-success product-badge">
         Nouveau
       </span>
 
@@ -162,7 +162,7 @@ const addToCart = () => {
 /* bouton panier */
 
 .btn-cart{
-  background:#0d6efd;
+  background:#fd7e14;
   color:white;
   border:none;
   padding:7px 16px;
@@ -172,7 +172,7 @@ const addToCart = () => {
 }
 
 .btn-cart:hover{
-  background:#0b5ed7;
+  background:#e46c0a;
 }
 
 /* bouton details */

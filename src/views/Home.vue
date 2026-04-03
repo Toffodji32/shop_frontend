@@ -107,6 +107,7 @@ const applyFilters = () => {
 
 const closeModal = () => {
   selectedProduct.value = null
+  console.log('Modal fermé')
 }
 // Chargement initial
 onMounted(async () => {
