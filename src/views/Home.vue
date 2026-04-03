@@ -70,7 +70,7 @@
     <ProductModal
       v-if="selectedProduct"
       :product="selectedProduct"
-      @close="selectedProduct = null"
+      @close="closeModal"
     />
 
     <CartModal
@@ -105,6 +105,9 @@ const applyFilters = () => {
   productStore.fetchFilteredProducts(selectedCategory.value, search.value)
 }
 
+const closeModal = () => {
+  selectedProduct.value = null
+}
 // Chargement initial
 onMounted(async () => {
   await productStore.fetchCategories()
