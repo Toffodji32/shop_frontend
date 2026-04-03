@@ -1,10 +1,10 @@
 <template>
-  <div class="modal-backdrop" @click.self="$emit('close')">
+  <div class="modal-backdrop" @click.self="emit('close')">
     <div class="modal-dialog">
       <div class="modal-content">
 
         <!-- bouton fermer -->
-        <button class="modal-close" @click="$emit('close')">✕</button>
+        <button class="modal-close" @click="emit('close')">✕</button>
 
         <div class="modal-body modal-horizontal">
 
@@ -28,7 +28,7 @@
               {{ product.description || 'Aucune description disponible pour ce produit.' }}
             </p>
 
-            <button class="btn-add-cart">
+            <button class="btn-add-cart" @click="addToCart">
               🛒 Ajouter au panier
             </button>
 
@@ -42,9 +42,25 @@
 </template>
 
 <script setup>
-defineProps({
+import { useCartStore } from '@/stores/cart.js'
+import Swal from "sweetalert2";
+
+const emit = defineEmits(['close'])
+const cartStore = useCartStore();
+
+const props = defineProps({
   product: Object
-})
+});
+
+const addToCart = () => {
+  cartStore.addToCart(props.product);
+  Swal.fire({
+    title: "Produit ajouté !",
+    text: `${props.product.name} a été ajouté au panier.`,
+    icon: "success",
+    confirmButtonText: "Continuer"
+  });
+};
 </script>
 
 <style scoped>
