@@ -80,7 +80,7 @@
 
                             <td>{{ product.id }}</td>
                             <td>{{ product.name }}</td>
-                            <td>{{ product.price }} €</td>
+                            <td>{{ product.price }} FCFA</td>
                             <td>{{ product.categorie?.name }}</td>
 
                         </tr>

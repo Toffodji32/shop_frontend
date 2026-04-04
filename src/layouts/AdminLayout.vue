@@ -1,12 +1,15 @@
 <template>
 
-    <body class="sb-nav-fixed">
+    <div class="sb-nav-fixed" :class="{ 'sb-sidenav-toggled': sidebarCollapsed }">
 
         <!-- TOP NAVBAR -->
         <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
 
             <!-- Brand -->
-            <a class="navbar-brand ps-3" href="#">Start Bootstrap</a>
+            <a class="navbar-brand ps-3" href="#">
+                <img src="/src/assets/images/logo.png" alt="Afrolis" height="45">
+                <span class="ms-2 fw-bold">Afrolis</span>
+            </a>
 
             <!-- Sidebar toggle -->
             <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" @click="toggleSidebar">
@@ -24,17 +27,17 @@
             <!-- Navbar user -->
             <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         <i class="fas fa-user fa-fw"></i>
                     </a>
 
                     <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" @click="$router.push('/dashboard/settings')">Settings</a></li>
+                        <li><a class="dropdown-item" href="#" @click.prevent="$router.push('/dashboard/settings')">Settings</a></li>
                         <li>
                             <hr class="dropdown-divider" />
                         </li>
                         <li>
-                            <a class="dropdown-item" @click="logout">Logout</a>
+                            <a class="dropdown-item" href="#" @click.prevent="logout">Logout</a>
                         </li>
                     </ul>
                 </li>
@@ -111,7 +114,7 @@
                     </div>
                     <div class="sb-sidenav-footer">
                         <div class="small">Logged in as:</div>
-                        {{ userConnected?.email }}
+                        {{ userConnected?.name }}
                     </div>
                 </nav>
             </div>
@@ -134,15 +137,14 @@
             </div>
         </div>
 
-    </body>
+    </div>
 </template>
 
 <script setup>
-import { ref } from "vue"
-import { useAuthStore } from "@/stores/auth"
-import { useRouter } from "vue-router"
-import {useCartStore} from "@/stores/cart"
-
+import { useAuthStore } from "@/stores/auth";
+import { useCartStore } from "@/stores/cart";
+import { onMounted, ref } from "vue";
+import { useRouter } from "vue-router";
 
 const userConnected = ref(null);
 const auth = useAuthStore();
@@ -169,16 +171,53 @@ const isAdmin = () => {
     return userConnected.value?.roles?.includes("ROLE_ADMIN")
 }
 
+// Initialiser Bootstrap Dropdowns
+onMounted(() => {
+    const initDropdowns = () => {
+        if (window.bootstrap && window.bootstrap.Dropdown) {
+            const dropdownElements = document.querySelectorAll('[data-bs-toggle="dropdown"]')
+            dropdownElements.forEach((element) => {
+                new window.bootstrap.Dropdown(element)
+            })
+        } else {
+            setTimeout(initDropdowns, 50)
+        }
+    }
+    initDropdowns()
+})
+
 </script>
 
-<!-- <style scoped>
+<style>
+/* 🔥 Fix Dropdown - Permettre l'affichage du menu en débordement */
+.sb-topnav {
+    overflow: visible !important;
+    position: relative;
+    z-index: 1040;
+}
+
+.navbar {
+    overflow: visible !important;
+}
+
+.navbar-nav {
+    overflow: visible !important;
+}
+
+.dropdown-menu {
+    position: absolute !important;
+    top: 100% !important;
+    z-index: 1050 !important;
+}
+</style>
+
+<style scoped>
 /* 🔥 Surbrillance menu actif */
 .active-link {
     background-color: #0d6efd;
     color: white !important;
     border-radius: 5px;
 }
-
 
 .nav-link:hover {
     background-color: rgba(255, 255, 255, 0.1);
@@ -194,4 +233,4 @@ const isAdmin = () => {
 main {
     background: #f8f9fa;
 }
-</style> -->
+</style> 
